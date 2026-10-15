@@ -1,0 +1,32 @@
+{
+  "chain_id": 1,
+  "user_agent": "tornado-usdc-research/0.1",
+  "endpoints": {
+    "tenderly": {
+      "url": "https://gateway.tenderly.co/public/mainnet",
+      "use": "wide-range eth_getLogs (topic-only censuses)",
+      "block_range_cap": 2000000,
+      "or_array_cap": 1000,
+      "notes": "few large requests; OR-arrays fail around ~1000"
+    },
+    "drpc": {
+      "url": "https://eth.drpc.org",
+      "use": "eth_call archive state; filtered getLogs",
+      "block_range_cap": 10000,
+      "or_array_cap": 1000,
+      "rate_limit_per_s": 2.5,
+      "transient_error_rate": 0.056,
+      "notes": "HTTP 400 above 10,000-block range; no JSON-RPC batching"
+    },
+    "mevblocker": {
+      "url": "https://rpc.mevblocker.io",
+      "use": "cross-check; large OR-arrays",
+      "block_range_cap": 50000,
+      "or_array_cap": 2400,
+      "notes": "eth_call rate-limited after ~100 calls"
+    }
+  },
+  "banned_endpoints": [
+    "merkle", "publicnode", "llamarpc", "1rpc", "nodies", "ankr", "blockpi"
+  ]
+}

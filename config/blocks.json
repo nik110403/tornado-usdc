@@ -1,0 +1,30 @@
+{
+  "apr2025": {
+    "block": 22170334,
+    "timestamp": "2025-03-31T23:59:59Z"
+  },
+  "census_start": {
+    "block": 9000000,
+    "timestamp": "2019-11-25T18:27:24Z"
+  },
+  "circle_cluster_end": {
+    "block": 15302766,
+    "timestamp": "2022-08-08T17:00:57Z"
+  },
+  "event_block": {
+    "block": 15302549,
+    "timestamp": "2022-08-08T16:15:01Z"
+  },
+  "merge_block": {
+    "block": 15537394,
+    "timestamp": "2022-09-15T06:42:59Z"
+  },
+  "pre_period_end": {
+    "block": 15298282,
+    "timestamp": "2022-08-07T23:59:57Z"
+  },
+  "pre_period_start": {
+    "block": 14929560,
+    "timestamp": "2022-06-08T23:59:08Z"
+  }
+}

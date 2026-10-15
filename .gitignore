@@ -1,0 +1,8 @@
+/out/*
+!/out/*/
+/out/*/*
+!/out/*/summary.md
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
