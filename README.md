@@ -61,4 +61,4 @@ All inputs are public Ethereum mainnet chain data (logs and contract calls). No 
 
 ## License
 
-See `LICENSE` (CC BY 4.0).
+Code: MIT (see `LICENSE`). Documentation and the gate summaries in `out/*/summary.md`: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
