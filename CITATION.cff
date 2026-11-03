@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this package, please cite it as below."
+type: software
+title: "USDC holders and the 2022 Tornado Cash freezes: data-construction pipeline"
+abstract: "Work in progress. A data-construction pipeline that rebuilds the cohort exposed to Circle's 2022 USDC freezes after the Tornado Cash sanctions from raw Ethereum mainnet JSON-RPC calls. No results are reported."
+authors:
+  - family-names: Khosravipour
+    given-names: Nik
+repository-code: "https://github.com/nik110403/tornado-usdc"
+url: "https://nikkhosravipour.com"
+license: MIT
