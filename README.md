@@ -1,13 +1,21 @@
 <p><picture><source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg"><img src="assets/banner-light.svg" alt="USDC holders and the 2022 Tornado Cash freezes" width="100%"></picture></p>
 
-**A data-construction pipeline for a study of how stablecoin holders responded to Circle's 2022 USDC freezes after the Tornado Cash sanctions. Every number is rebuilt from raw Ethereum mainnet JSON-RPC calls.**
+**Data-construction code for a study of how stablecoin holders responded to Circle's 2022 USDC freezes after the Tornado Cash sanction. Every number is rebuilt from raw Ethereum mainnet JSON-RPC calls.**
 
-[Data](#data-availability) · [Site](https://nikkhosravipour.com)
+[Paper](#the-paper) · [Data](#data-availability) · [Site](https://nikkhosravipour.com)
 
-[![License: MIT](https://img.shields.io/badge/code-MIT-8c2f1b?style=flat)](LICENSE) [![License: CC BY 4.0](https://img.shields.io/badge/text%20and%20summaries-CC%20BY%204.0-8c2f1b?style=flat)](LICENSE-docs) [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-57534e?style=flat)](https://www.python.org/) [![Status: work in progress](https://img.shields.io/badge/status-work%20in%20progress-57534e?style=flat)](#status)
+[![License: MIT](https://img.shields.io/badge/code-MIT-8c2f1b?style=flat)](LICENSE) [![License: CC BY 4.0](https://img.shields.io/badge/text%20and%20summaries-CC%20BY%204.0-8c2f1b?style=flat)](LICENSE-docs) [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-57534e?style=flat)](https://www.python.org/) [![Status: 15 Oct snapshot](https://img.shields.io/badge/status-15%20Oct%202026%20snapshot-57534e?style=flat)](#status)
 
-> [!NOTE]
-> **Work in progress.** This repository holds the data construction only. No estimates or results are reported here, and the analysis is unfinished. The research was carried out during a research internship at the American Institute for Economic Research (Fall 2026). Views and code are the author's own.
+> [!IMPORTANT]
+> **This is the 15 October 2026 construction snapshot, not the code behind the paper's numbers.** The paper is finished (November 2026). The code that produced its numbers was revised after this snapshot, pre-specified, signed and hashed privately on 28 October 2026, and will be published here as a versioned replication release (v1.0). Until then, the counts below are superseded by the paper's: 86,571 externally owned addresses (this snapshot: 86,720), 4,502 passing the holding floors (this snapshot: 4,508), and 4,487 exposed wallets matched to 11,495 controls. See [Status](#status) for what changed and what the release will contain.
+>
+> The research was carried out during a research internship at the American Institute for Economic Research (Fall 2026). Views and code are the author's own.
+
+## The paper
+
+Nik Khosravipour, *Issuer Discretion and Stablecoin Holdings after the Tornado Cash Sanction*, 6 November 2026. A link follows here once the paper is posted.
+
+On 8 August 2022 the US Treasury sanctioned Tornado Cash. Circle froze USDC at the listed addresses that day; Tether froze none then. The paper compares the USDC and USDT holdings of 4,487 past Tornado Cash users, not themselves frozen, with 11,495 matched wallets that had no recorded Tornado Cash use before the event.
 
 ## Quick start
 
@@ -39,9 +47,11 @@ Each stage in `gates/` exposes `run(cfg) -> int` (0 = pass) and writes a `summar
 | g1c | Control-side balance probe | `gates/g1c_funnel.py` | `out/g1c/summary.md` |
 | g2 | Reconstruction integrity (supply invariants, freeze intersection, reconciliation) | `gates/g2_integrity.py` | `out/g2/summary.md` |
 
-### Gate funnel
+This snapshot stops at g2. The control matching, the post-event panel and the estimation are not in it; they come with the release.
 
-Taken verbatim from `out/*/summary.md`; see those files for the acceptance checks.
+### Gate funnel (this snapshot)
+
+Taken verbatim from `out/*/summary.md`; see those files for the acceptance checks. These are the 15 October counts. The paper's counts differ; see [Status](#status).
 
 - g0: 97 emitters in the census (91 Tornado Cash instances, 6 other); 174,184 deposit logs and 161,570 withdrawal logs; 23 designated pools holding 163,870 deposits; 38 distinct addresses in the Circle blacklisting cluster at blocks 15,302,549 to 15,302,766.
 - g1: 60,707 unique withdrawal-arm recipients; 87,051 deduplicated cohort addresses, of which 331 are contracts and 86,720 are externally owned; 8,384 with at least one pre-period transfer; 7,080 in the daily panel; 4,508 pass the holding floor.
@@ -59,7 +69,7 @@ Taken verbatim from `out/*/summary.md`; see those files for the acceptance check
 
 Contracts: USDC `0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`, USDT `0xdAC17F958D2ee523a2206206994597C13D831ec7` (both 6 decimals). Pre-period: 2022-06-09 00:00 UTC to 2022-08-07 23:59 UTC. First Circle `Blacklisted` event: block 15,302,549 (2022-08-08).
 
-No off-chain or personal data is used. Wallet addresses are pseudonymous on-chain identifiers; no attempt is made to link them to individuals.
+No off-chain or personal data is used. Wallet addresses are pseudonymous on-chain identifiers; no attempt is made to link them to individuals. Wallet-level lists (the exposed cohort and the matched controls) are not distributed, here or in the release: the code regenerates them from public logs.
 
 ## Tests
 
@@ -86,7 +96,14 @@ tornado-usdc/
 
 ## Status
 
-The estimation code and results will follow in a versioned release with a DOI once the paper is final.
+**What changed after this snapshot.** The cohort rules were corrected before the analysis was signed. The exposure window and the contract screen (`eth_getCode`) now end at the end of the pre-period (block 15,298,282, 7 August 2022) instead of the event block, and a baseline-participation rule was added. The data-construction files were revised accordingly, so 9 of the files in this snapshot differ from the signed versions. That is why the counts here differ from the paper's.
+
+**The pre-specification.** The analysis was pre-specified, signed and hashed privately on 28 October 2026. At that point no 9 August to 12 September 2022 outcome panel had been built and no main post-event contrast had been estimated; the pre-specification itself lists what could be seen before signing. The signed files will be published byte-for-byte in the release. Their hashes, recorded here so the release can be checked against them:
+
+- sha256 of the signed hash list `prespec/SHA256`: `6bc01a5c9132beceec8289e015ef3393ed83b581074259d6c1e44e8cc1a6516e`
+- sha256 of the pre-specification text `prespec/prespec.md`: `e598ada76b03e7474be179e085ba8d6f2975602f975ecee8b70db6d0b80d07cc`
+
+**The release (v1.0)** will contain the signed data-construction and control-matching code, the R estimation, the pre-specification and its addenda, the scripts that rebuild the paper's tables and figures from aggregate outputs, a pinned environment, and a provenance note. It will carry a DOI. It will not contain wallet-level lists.
 
 ## Citation
 
@@ -98,7 +115,7 @@ GitHub shows a "Cite this repository" button from `CITATION.cff`. BibTeX:
 ```bibtex
 @misc{tornado_usdc2026,
   author = {Khosravipour, Nik},
-  title  = {USDC holders and the 2022 Tornado Cash freezes: data-construction pipeline},
+  title  = {USDC holders and the 2022 Tornado Cash freezes: data-construction pipeline (15 October 2026 snapshot)},
   year   = {2026},
   url    = {https://github.com/nik110403/tornado-usdc}
 }
