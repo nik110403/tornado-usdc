@@ -1,0 +1,9 @@
+population_id,generation_id,input_trace_hash,outcome,cap,cluster,status,beta,lo,hi,decision,primary_decision,differs_from_primary_case
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,D,none,uid,estimated,0.817144141700026,-0.174028768335515,1.80831705173557,2,1,TRUE
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,D,none,stratum,estimated,0.817144141700026,-0.178159170539586,1.81244745393964,2,1,TRUE
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,A,none,uid,estimated,0.618605798738343,-0.373373797139014,1.6105853946157,inconclusive,decline,TRUE
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,A,none,stratum,estimated,0.618605798738343,-0.368412673587982,1.60562427106467,inconclusive,decline,TRUE
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,D,leg_pooled,uid,estimated,-0.150311746307217,-0.182155890592517,-0.118467602021917,1,1,FALSE
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,D,leg_pooled,stratum,estimated,-0.150311746307217,-0.185922884138882,-0.114700608475552,1,1,FALSE
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,A,leg_pooled,uid,estimated,-0.143496368045658,-0.174563537052796,-0.112429199038519,decline,decline,FALSE
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,A,leg_pooled,stratum,estimated,-0.143496368045658,-0.178224733151218,-0.108768002940098,decline,decline,FALSE

@@ -1,0 +1,3 @@
+population_id,generation_id,input_trace_hash,row,status,reason,att,se,lo,hi,decision_case,n_exposed,n_control,n_controls_trimmed,n_exposed_above_trim_untrimmed,ps_flag,ipt_secondary_algorithm,package,version,fn,trim_level,n_dropped_B_le_0
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,capped_D,estimated,,-0.137915301810717,0.0146655430622121,-0.166659766212652,-0.109170837408781,1,4501,71779,0,0,0,FALSE,DRDID,1.4.0,drdid_imp_panel,0.99,0
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,uncapped_D,estimated,,0.735574076579018,0.496816671503393,-0.238186599567631,1.70933475272567,2,4501,71779,0,0,0,FALSE,DRDID,1.4.0,drdid_imp_panel,0.99,0

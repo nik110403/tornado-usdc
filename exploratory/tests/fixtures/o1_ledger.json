@@ -1,0 +1,98 @@
+{
+ "day0": 1404,
+ "destroyed": [
+  {
+   "address": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb02",
+   "amount": 5000000,
+   "block": 1100,
+   "date": "2022-03-25"
+  }
+ ],
+ "expected_day0": {
+  "USDC": {
+   "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa01": 90123456,
+   "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa02": 25000000,
+   "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb01": 1,
+   "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb02": 7000000
+  },
+  "USDT": {
+   "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa01": 5000000,
+   "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa02": 25000000,
+   "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb01": 18000000,
+   "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb02": 38000000
+  }
+ },
+ "open": {
+  "USDC": {
+   "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa01": 100000000,
+   "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa02": 0,
+   "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb01": 50000000,
+   "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb02": 7000000
+  },
+  "USDT": {
+   "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa01": 0,
+   "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa02": 30000000,
+   "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb01": 20000000,
+   "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb02": 40000000
+  }
+ },
+ "pin": 1000,
+ "transfers": [
+  [
+   1003,
+   "USDC",
+   "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa01",
+   "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee01",
+   10000000
+  ],
+  [
+   1010,
+   "USDC",
+   "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee01",
+   "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa02",
+   25000000
+  ],
+  [
+   1010,
+   "USDT",
+   "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa02",
+   "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa01",
+   5000000
+  ],
+  [
+   1050,
+   "USDC",
+   "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb01",
+   "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee01",
+   50000000
+  ],
+  [
+   1051,
+   "USDC",
+   "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee01",
+   "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb01",
+   1
+  ],
+  [
+   1200,
+   "USDT",
+   "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee01",
+   "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb02",
+   3000000
+  ],
+  [
+   1403,
+   "USDC",
+   "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee01",
+   "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa01",
+   123456
+  ],
+  [
+   1404,
+   "USDT",
+   "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb01",
+   "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee01",
+   2000000
+  ]
+ ]
+}

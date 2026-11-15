@@ -1,0 +1,8 @@
+metric,value
+beta_D,-0.156909830852151
+se_D_wallet,0.105023375068306
+se_D_stratum,0.104198335664396
+beta_A,0.0028339731800023
+se_A,0.00702183887197364
+dropped_exposed,78
+n_controls,287

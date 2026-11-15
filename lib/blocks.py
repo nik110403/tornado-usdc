@@ -21,9 +21,13 @@ def load_pinned():
 
 
 def _save(pinned):
-    with open(_BLOCKS_PATH, "w") as f:
+    tmp = _BLOCKS_PATH + ".tmp"
+    with open(tmp, "w") as f:
         json.dump(pinned, f, indent=2, sort_keys=True)
         f.write("\n")
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, _BLOCKS_PATH)
 
 
 def pin(name, block, timestamp):

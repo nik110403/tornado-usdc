@@ -6,7 +6,9 @@
     joined to designated-pool Deposit logs on (blockNumber, transactionHash);
     the unmatched residual is counted, not fetched further (deferred).
 (c) Dedupe across arms; an address in both is flagged `both_arms`.
-(d) Exclude any address with eth_getCode non-empty at the event block.
+(d) Exclude any address with eth_getCode non-empty at the eligibility cutoff
+    (pre_period_end, 15298282 -- prespec section 1; S16 corrected this from the
+    event block).
 (e) Pre-period participation: filtered Transfer logs (USDC + USDT, both
     `from`/`to` topic positions) over the pinned pre-period blocks.
 (f) Daily balances for every participating wallet: balanceOf at the
@@ -70,6 +72,49 @@ WITHDRAWAL_TOPIC = keccak.topic("Withdrawal(address,bytes32,address,uint256)")
 ENCRYPTED_NOTE_TOPIC = keccak.topic("EncryptedNote(address,bytes)")
 TRANSFER_TOPIC = keccak.topic("Transfer(address,address,uint256)")
 BALANCE_OF_SELECTOR = keccak.selector("balanceOf(address)")
+
+# --- S16: eligibility cutoff + baseline-participation rule ---
+# Eligibility (exposure-log fetch, both-arm contract screen) is bounded by the
+# pinned pre-period end, not the event block (prespec section 1). `event_block`
+# is still read in run() but only for the event-only record kept in summary.md;
+# it bounds no fetch and no eth_getCode screen.
+ELIGIBILITY_CUTOFF_KEY = "pre_period_end"
+EVENT_ONLY_KEY = "event_block"
+
+# Whether the exposed arm additionally requires >=1 baseline pre-period
+# Transfer is UNRESOLVED (READINESS / S14). No default: cfg["participation_rule"]
+# is required and recorded in cohort.schema.json + summary.md. Per-wallet
+# `has_baseline_transfer` is always written so the delta can be taken either way.
+RULE_BASELINE_TRANSFER = "baseline_transfer_required"  # behaviour before S16
+RULE_NONE = "none"                                     # passive holders stay in
+PARTICIPATION_RULES = (RULE_BASELINE_TRANSFER, RULE_NONE)
+
+
+def eligibility_blocks(pinned):
+    """Pinned blocks for the eligibility steps. Pure; `pinned` = cfg["blocks"]."""
+    cutoff = pinned[ELIGIBILITY_CUTOFF_KEY]["block"]
+    return {"exposure_end": cutoff, "contract_screen": cutoff,
+            "event_only": pinned[EVENT_ONLY_KEY]["block"]}
+
+
+def resolve_participation_rule(cfg):
+    rule = cfg.get("participation_rule")
+    if rule not in PARTICIPATION_RULES:
+        raise ValueError(
+            f"cfg['participation_rule'] is required (one of {PARTICIPATION_RULES}); got {rule!r}. "
+            "The baseline-Transfer participation rule is unresolved (S14) and has no default.")
+    return rule
+
+
+def select_participants(cohort_addrs, participation, rule):
+    """Wallets that get balance reconstruction. Under `baseline_transfer_required`
+    only wallets with >=1 pre-period Transfer; under `none` every cohort wallet
+    (passive holders are reconstructed from balanceOf at pre_period_start)."""
+    if rule == RULE_NONE:
+        return sorted(cohort_addrs)
+    if rule == RULE_BASELINE_TRANSFER:
+        return sorted(a for a in cohort_addrs if participation.get(a))
+    raise ValueError(f"unknown participation_rule {rule!r}")
 
 
 def _cross_check_topics():
@@ -471,9 +516,13 @@ def run(cfg):
     if os.path.exists(_RECEIPTS_PATH):
         os.remove(_RECEIPTS_PATH)
 
+    rule = resolve_participation_rule(cfg)
     pinned = cfg["blocks"]
     census_start = pinned["census_start"]["block"]
-    event_block = pinned["event_block"]["block"]
+    eb = eligibility_blocks(pinned)
+    exposure_end = eb["exposure_end"]      # exposure-log fetch upper bound (= pre_period_end)
+    screen_block = eb["contract_screen"]   # eth_getCode anchor (= pre_period_end)
+    event_block = eb["event_only"]         # event-only: reported in summary.md, bounds nothing
     # pre_period_start/_end are boundary blocks: the pinned start block is
     # the *last block before* 2022-06-09T00:00:00Z (a snapshot reference,
     # its own date is 2022-06-08); the pinned end block is the last block
@@ -488,11 +537,11 @@ def run(cfg):
     print(f"[g1] {len(designated)} designated pools (from out/g0/manifest.csv)")
 
     # --- (a) withdrawal arm ---
-    print(f"[g1] (a) withdrawal arm: Withdrawal @ designated pools, {census_start} -> {event_block} on {WIDE}")
+    print(f"[g1] (a) withdrawal arm: Withdrawal @ designated pools, {census_start} -> {exposure_end} on {WIDE}")
     start_line = _line_count(_RECEIPTS_PATH)
-    wd_logs = _get_logs_chunked(WIDE, census_start, event_block, address=designated, topics=[[WITHDRAWAL_TOPIC]], gate="g1", window=2_000_000)
+    wd_logs = _get_logs_chunked(WIDE, census_start, exposure_end, address=designated, topics=[[WITHDRAWAL_TOPIC]], gate="g1", window=2_000_000)
     wd_recs = _new_receipts(start_line)
-    _assert_component_tiled(wd_recs, census_start, event_block, "withdrawal arm")
+    _assert_component_tiled(wd_recs, census_start, exposure_end, "withdrawal arm")
     all_ranges.extend(_tag_ranges(wd_recs, designated, [[WITHDRAWAL_TOPIC]]))
     withdrawal_recipients = defaultdict(int)
     for l in wd_logs:
@@ -503,16 +552,16 @@ def run(cfg):
     # --- (b) deposit arm ---
     print(f"[g1] (b) deposit arm: Deposit @ designated pools + EncryptedNote sweep")
     start_line = _line_count(_RECEIPTS_PATH)
-    dep_logs = _get_logs_chunked(WIDE, census_start, event_block, address=designated, topics=[[DEPOSIT_TOPIC]], gate="g1", window=2_000_000)
+    dep_logs = _get_logs_chunked(WIDE, census_start, exposure_end, address=designated, topics=[[DEPOSIT_TOPIC]], gate="g1", window=2_000_000)
     dep_recs = _new_receipts(start_line)
-    _assert_component_tiled(dep_recs, census_start, event_block, "deposit-arm Deposit logs")
+    _assert_component_tiled(dep_recs, census_start, exposure_end, "deposit-arm Deposit logs")
     all_ranges.extend(_tag_ranges(dep_recs, designated, [[DEPOSIT_TOPIC]]))
     print(f"[g1]   {len(dep_logs)} designated-pool Deposit logs")
 
     start_line = _line_count(_RECEIPTS_PATH)
-    note_logs = _get_logs_chunked(WIDE, census_start, event_block, address=None, topics=[[ENCRYPTED_NOTE_TOPIC]], gate="g1", window=2_000_000)
+    note_logs = _get_logs_chunked(WIDE, census_start, exposure_end, address=None, topics=[[ENCRYPTED_NOTE_TOPIC]], gate="g1", window=2_000_000)
     note_recs = _new_receipts(start_line)
-    _assert_component_tiled(note_recs, census_start, event_block, "EncryptedNote sweep")
+    _assert_component_tiled(note_recs, census_start, exposure_end, "EncryptedNote sweep")
     all_ranges.extend(_tag_ranges(note_recs, None, [[ENCRYPTED_NOTE_TOPIC]]))
     print(f"[g1]   {len(note_logs)} EncryptedNote logs (all instances, topic-only)")
 
@@ -562,9 +611,9 @@ def run(cfg):
     print(f"[g1] (c) {len(all_addrs)} deduped addresses across arms ({len(both_arms_set)} in both)")
 
     # --- (d) contract exclusion ---
-    print(f"[g1] (d) contract exclusion: eth_getCode @ {event_block} for {len(all_addrs)} addresses on {OR} (batched)")
+    print(f"[g1] (d) contract exclusion: eth_getCode @ {screen_block} for {len(all_addrs)} addresses on {OR} (batched)")
     sorted_addrs = sorted(all_addrs)
-    codes = _batch_get_code(OR, sorted_addrs, event_block)
+    codes = _batch_get_code(OR, sorted_addrs, screen_block)
     excluded = {a for a, c in codes.items() if c not in (None, "0x", "0x0")}
     cohort_addrs = sorted(all_addrs - excluded)
     print(f"[g1]   excluded {len(excluded)} contract addresses; {len(cohort_addrs)} EOA cohort members remain")
@@ -619,8 +668,11 @@ def run(cfg):
                         daily_flow[coin_name][to_addr][day] += value
                 print(f"[g1]   {coin_name} {position} batch {bi // OR_ARRAY_BATCH + 1}/{n_batches}: {len(logs)} logs, {new} new")
 
-    participating = sorted(a for a in cohort_addrs if participation[a])
-    print(f"[g1]   {len(participating)} participating wallets (>=1 Transfer in either coin during pre-period)")
+    has_baseline = {a for a in cohort_addrs if participation.get(a)}
+    participating = select_participants(cohort_addrs, participation, rule)
+    participating_set = set(participating)
+    print(f"[g1]   {len(has_baseline)} wallets with >=1 baseline Transfer in either coin during pre-period; "
+          f"participation_rule={rule} -> {len(participating)} tracked wallets")
 
     # USDT DestroyedBlackFunds (S1's usdt_events.csv) -- applies only where
     # the wallet is already being tracked for USDT via a real Transfer.
@@ -628,7 +680,7 @@ def run(cfg):
     destroyed_applied = 0
     for row in destroyed:
         addr = row["address"]
-        if addr not in cohort_set or "USDT" not in participation[addr]:
+        if addr not in cohort_set or not ("USDT" in participation.get(addr, ()) or rule == RULE_NONE):
             continue
         day = (date.fromisoformat(row["date"]) - PRE_START_DATE).days
         if not (0 <= day < N_DAYS):
@@ -669,11 +721,13 @@ def run(cfg):
         wid = wallet_id[addr]
         arm = arm_of[addr]
         both_arms_flag = addr in both_arms_set
-        if addr not in participation or not participation[addr]:
+        has_bt = addr in has_baseline
+        if addr not in participating_set:
             cohort_rows.append({
                 "wallet_id": wid, "address": addr, "arm": arm, "both_arms": both_arms_flag,
                 "holding_type": "none", "both_every_day": False, "pre_mean_total_units": 0,
                 "nonzero_days": 0, "floor_pass": False, "in_panel": False,
+                "has_baseline_transfer": has_bt,
             })
             continue
 
@@ -706,6 +760,7 @@ def run(cfg):
             "holding_type": holding_type, "both_every_day": both_every_day,
             "pre_mean_total_units": pre_mean_total_units, "nonzero_days": nonzero_days,
             "floor_pass": floor_pass, "in_panel": in_panel,
+            "has_baseline_transfer": has_bt,
         })
 
         for coin_name, s in series.items():
@@ -758,10 +813,27 @@ def run(cfg):
         ("nonzero_days", "int", "pre-period days with nonzero total balance"),
         ("floor_pass", "bool", f"pre_mean_total_units >= {FLOOR_MIN_UNITS} and nonzero_days >= {FLOOR_MIN_NONZERO_DAYS}"),
         ("in_panel", "bool", "nonzero total balance on >=1 pre-period day"),
+        ("has_baseline_transfer", "bool", ">=1 USDC/USDT Transfer in the pre-period (independent of participation_rule)"),
     ]
+    cohort_notes = (f"participation_rule={rule} (UNRESOLVED upstream, S14; recorded, not defaulted). "
+                    f"eligibility cutoff block {exposure_end} ({ELIGIBILITY_CUTOFF_KEY}) bounds the exposure logs and the "
+                    f"eth_getCode screen; {EVENT_ONLY_KEY} {event_block} bounds neither.")
     cohort_path, cohort_sha, cohort_n = _write_table(
         "cohort", cohort_rows, cohort_columns, "wallet_id",
         input_hashes=[r["sha256"] for r in (wd_recs + dep_recs + note_recs)],
+        notes=cohort_notes,
+    )
+
+    screen_rows = [{"address": a, "arm": arm_of[a], "screen": "contract" if a in excluded else "eoa",
+                    "screen_block": screen_block} for a in all_addrs]
+    screen_columns = [
+        ("address", "str", "0x, 42 chars, lowercase"), ("arm", "str", "withdrawal|deposit|both"),
+        ("screen", "str", "eoa|contract (eth_getCode at screen_block)"), ("screen_block", "int", "eth_getCode block"),
+    ]
+    screen_path, screen_sha, screen_n = _write_table(
+        "eligibility_screen", screen_rows, screen_columns, "address",
+        input_hashes=[r["sha256"] for r in (wd_recs + dep_recs + note_recs)],
+        notes="every deduped exposure address with its contract-screen outcome; reason source for cohort-delta.",
     )
 
     residual_columns = [
@@ -779,7 +851,7 @@ def run(cfg):
     # --- validation checks ---
     unit_issues = _validate_units_columns(cohort_path, ["pre_mean_total_units"]) + _validate_units_columns(wcdp_path, ["balance_units"])
     checks.append(("every *_units column matches ^-?[0-9]+$", not unit_issues, "; ".join(unit_issues) or "ok"))
-    sidecars_ok = all(os.path.exists(os.path.join(_OUT_DIR, f"{n}.schema.json")) for n in ("cohort", "wallet_coin_day_pre", "deposit_residual"))
+    sidecars_ok = all(os.path.exists(os.path.join(_OUT_DIR, f"{n}.schema.json")) for n in ("cohort", "wallet_coin_day_pre", "deposit_residual", "eligibility_screen"))
     checks.append(("schema.json sidecars present", sidecars_ok, "ok" if sidecars_ok else "missing sidecar(s)"))
 
     # --- crosstab.md ---
@@ -816,7 +888,7 @@ def run(cfg):
     crosstab_lines = [
         "# Gate 1 -- exposed cohort crosstab",
         "",
-        f"Cohort (post-exclusion): {len(cohort_addrs)}. Participating (>=1 pre-period Transfer): {len(participating)}.",
+        f"Cohort (post-exclusion): {len(cohort_addrs)}. Tracked wallets (rule {rule}): {len(participating)}.",
         f"In-panel (nonzero balance >=1 pre-period day): {len(in_panel_rows)}. Floor-passing: {len(floor_rows)}.",
         "",
         *_table_lines(in_panel_rows, "arm x holding_type -- all in-panel"),
@@ -848,8 +920,12 @@ def run(cfg):
         f"Withdrawal arm: {len(wd_logs)} logs, {len(withdrawal_recipients)} unique recipients.",
         f"Deposit arm: {len(dep_logs)} designated-pool Deposit logs, {len(note_logs)} EncryptedNote logs (all instances), "
         f"{matched} matched ({resolve_rate:.1%}), {len(residual_rows)} unmatched residual.",
+        f"Eligibility cutoff: {ELIGIBILITY_CUTOFF_KEY} = {exposure_end} (exposure logs + eth_getCode); "
+        f"{EVENT_ONLY_KEY} {event_block} used for neither.",
+        f"Participation rule (unresolved, recorded): `{rule}`. Wallets with a baseline Transfer: {len(has_baseline)}; "
+        f"tracked: {len(participating)}.",
         f"Deduped cohort: {len(all_addrs)}; excluded {len(excluded)} contract addresses; {len(cohort_addrs)} EOA cohort members.",
-        f"Participating (>=1 pre-period Transfer): {len(participating)}. USDT DestroyedBlackFunds applied: {destroyed_applied}.",
+        f"Tracked wallets (rule {rule}): {len(participating)}. USDT DestroyedBlackFunds applied: {destroyed_applied}.",
         f"In-panel: {len(in_panel_rows)}. Floor-passing (pooled): {floor_pooled} -- {verdict}.",
         f"Cross-endpoint reverification: {len(reverified)} ranges re-fetched and matched.",
         "",
@@ -863,6 +939,7 @@ def run(cfg):
         f"- `cohort.csv` ({cohort_n} rows, sha256 `{cohort_sha}`)",
         f"- `wallet_coin_day_pre.csv` ({wcdp_rows_written} rows, sha256 `{wcdp_sha}`)",
         f"- `deposit_residual.csv` ({residual_n} rows, sha256 `{residual_sha}`)",
+        f"- `eligibility_screen.csv` ({screen_n} rows, sha256 `{screen_sha}`)",
         "- `crosstab.md`",
     ]
     with open(os.path.join(_OUT_DIR, "summary.md"), "w") as f:
@@ -874,3 +951,113 @@ def run(cfg):
             print(f"[g1] FAIL: {name} -- {detail}")
         return 1
     return 0
+
+
+# --- S16: deterministic cohort-delta artifact (pure; no RPC, no out/ default) ---
+
+def _read_csv_rows(path):
+    with open(path, newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def _sha256_file(path):
+    with open(path, "rb") as f:
+        return hashlib.sha256(f.read()).hexdigest()
+
+
+def _provenance(cohort_path):
+    """sha256 of the cohort file plus producer fields from its sidecar
+    (<stem>.schema.json beside it), if present."""
+    out = {"cohort_sha256": _sha256_file(cohort_path)}
+    sidecar = os.path.splitext(cohort_path)[0] + ".schema.json"
+    if os.path.exists(sidecar):
+        with open(sidecar) as f:
+            sc = json.load(f)
+        out["producing_commit"] = sc.get("producing_commit")
+        out["input_hashes"] = sorted(sc.get("input_hashes", []))
+        out["notes"] = sc.get("notes")
+    else:
+        out["producing_commit"] = None
+        out["input_hashes"] = []
+        out["notes"] = None
+    return out
+
+
+_TRACKED_FIELDS = ("arm", "both_arms", "floor_pass", "in_panel", "has_baseline_transfer")
+
+
+def build_cohort_delta(old_cohort, new_cohort, old_screen=None, new_screen=None):
+    """Delta between two cohort.csv files (explicit paths). Additions/removals
+    are keyed on lowercase address; reasons come from the optional
+    eligibility_screen.csv of the *other* side, else `unattributed`. `changed`
+    lists same-address field changes (a missing column on one side is skipped).
+    Deterministic: sorted, no timestamps."""
+    old = {r["address"].lower(): r for r in _read_csv_rows(old_cohort)}
+    new = {r["address"].lower(): r for r in _read_csv_rows(new_cohort)}
+    old_scr = {r["address"].lower(): r["screen"] for r in _read_csv_rows(old_screen)} if old_screen else None
+    new_scr = {r["address"].lower(): r["screen"] for r in _read_csv_rows(new_screen)} if new_screen else None
+
+    def reason_removed(a):
+        if new_scr is None:
+            return "unattributed"
+        st = new_scr.get(a)
+        if st == "contract":
+            return "contract_at_new_cutoff"
+        if st is None:
+            return "no_exposure_log_by_new_cutoff"
+        return "unattributed"
+
+    def reason_added(a):
+        if old_scr is None:
+            return "unattributed"
+        st = old_scr.get(a)
+        if st == "contract":
+            return "contract_only_at_old_screen_block"
+        if st is None:
+            return "not_in_old_exposure_log"
+        return "unattributed"
+
+    changed = []
+    for a in sorted(set(old) & set(new)):
+        diffs = {f: {"old": old[a][f], "new": new[a][f]}
+                 for f in _TRACKED_FIELDS if f in old[a] and f in new[a] and old[a][f] != new[a][f]}
+        if diffs:
+            changed.append({"address": a, "fields": diffs})
+    return {
+        "old": _provenance(old_cohort),
+        "new": _provenance(new_cohort),
+        "counts": {"old": len(old), "new": len(new)},
+        "added": [{"address": a, "reason": reason_added(a)} for a in sorted(set(new) - set(old))],
+        "removed": [{"address": a, "reason": reason_removed(a)} for a in sorted(set(old) - set(new))],
+        "changed": changed,
+    }
+
+
+def write_cohort_delta(delta, out_path):
+    with open(out_path, "w") as f:
+        json.dump(delta, f, indent=2, sort_keys=True)
+        f.write("\n")
+    return _sha256_file(out_path)
+
+
+def main(argv=None):
+    """`python3 -m gates.g1_cohort delta OLD_COHORT NEW_COHORT OUT.json
+    [--old-screen P] [--new-screen P]` -- reads only the paths given."""
+    import argparse
+    ap = argparse.ArgumentParser(prog="g1_cohort")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    d = sub.add_parser("delta")
+    d.add_argument("old_cohort")
+    d.add_argument("new_cohort")
+    d.add_argument("out")
+    d.add_argument("--old-screen")
+    d.add_argument("--new-screen")
+    args = ap.parse_args(argv)
+    delta = build_cohort_delta(args.old_cohort, args.new_cohort, args.old_screen, args.new_screen)
+    sha = write_cohort_delta(delta, args.out)
+    print(f"[g1] cohort delta: +{len(delta['added'])} -{len(delta['removed'])} ~{len(delta['changed'])} sha256 {sha}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

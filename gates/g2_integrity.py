@@ -16,7 +16,7 @@
     USDT's `AddedBlackList`/`DestroyedBlackFunds` addresses (out/g0/
     usdt_events.csv) -> out/g2/frozen_in_cohort.csv with per-event dates.
     Flagged, never dropped -- and never merged back into cohort.csv, which is
-    out of this item's Touches scope (see the deviation note in the project spec).
+    out of this item's Touches scope (see Deviation note in SPEC.md).
 (iii) Canary + stratified check: 10 cohort wallets, stratified by {coin,
     zero/nonzero, high/low activity}, reconstructed independently (this
     gate's own balanceOf + Transfer-log walk, not S2's persisted numbers) at

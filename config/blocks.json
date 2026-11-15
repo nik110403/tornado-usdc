@@ -15,6 +15,10 @@
     "block": 15302549,
     "timestamp": "2022-08-08T16:15:01Z"
   },
+  "june_end": {
+    "block": 15053225,
+    "timestamp": "2022-06-30T23:59:28Z"
+  },
   "merge_block": {
     "block": 15537394,
     "timestamp": "2022-09-15T06:42:59Z"

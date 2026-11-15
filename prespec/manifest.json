@@ -1,0 +1,55 @@
+{
+  "assembled_at_commit": "5019e98a5657865b2edb9f241346f30bf0ee4bc2",
+  "assembler_sha256": "1d5585945b5448880f9a4e0d857c6de84f25c36ca7b082875140b5526e6c4148",
+  "bridge_date": "2022-08-08",
+  "bridge_end_block": 15304705,
+  "dryrun_sha256": "24f6a644eddfa061de952cc4e7d34bf2bbbf62777f93edfa9e1a45c02cbc186c",
+  "eligible_statuses": [
+    "retained"
+  ],
+  "input_file_sha256": {
+    "/home/nik/Projects/analysis/tornado-usdc/out/recovery/presign/main-gen-M-20261027/eligible_frame_coverage.csv": "7b7c3c98bf9fb68780ec12d498bdddde3795dddf4b91441222033caa7bf17788",
+    "/home/nik/Projects/analysis/tornado-usdc/out/recovery/presign/wallet-map-20261028/wallet_map.csv": "d67acb2eb68da573d3d0da0e69160fc2a3d5d32162502829ec96bcbef6c3c817"
+  },
+  "populations": [
+    [
+      "main",
+      "gen-M"
+    ]
+  ],
+  "post_end_block": 15523803,
+  "post_end_date": "2022-09-12",
+  "post_input_file_sha256": {
+    "analysis_parameters": "13a39ac343f704c48051aad1eace65e7f775cb75b77bf69794cd0a5313d428d3",
+    "deposit_counts": "3132873277c6a85e99037ca78024d0af972bb0e425f7517f35679affac3cce43",
+    "eligible_frame_coverage": "7b7c3c98bf9fb68780ec12d498bdddde3795dddf4b91441222033caa7bf17788",
+    "g0_circle_events": "6ece4e7c9685bdfa3ea936b2b4ed35645c02e942f9c2de7d3b3997add6205901",
+    "g0_receipts": "edbe533e646c9a95fe058ef530825e9db2b6ea078948785d246f26243749df1a",
+    "g0_usdt_events": "c07fdfd98b666b77e64b4d3d76b04fb33c9a38bb29058e71c1e1a6f5b4836516",
+    "match_membership": "8ae9639c3f9b8cf35b71e29a8b9e40a84b05ff2bb273ef9fd436393018440b10",
+    "pre/covariates.csv": "a21a1524724066456a867304d9b872976b7ec2766d6347f533365b368fd4b4c0",
+    "pre/wallet_coin_day_pre.csv": "c2ea9ce316b8592346124b5119f9a0f8cdea228ad4baeff8bc72d66e8d831257",
+    "usdc_pool_flag": "4664782379bb4cb4e3c4e77d83fec3f101db21eaa8f11475a84b7f87910381cd"
+  },
+  "post_start_date": "2022-08-09",
+  "pre_end_block": 15298282,
+  "r_package_versions": {
+    "BMisc": "1.4.10",
+    "DRDID": "1.4.0",
+    "Matrix": "1.6.5",
+    "Rcpp": "1.1.2",
+    "RcppEigen": "0.3.4.0.2",
+    "bigmemory": "4.6.6",
+    "data.table": "1.18.4",
+    "dreamerr": "1.5.0",
+    "fastglm": "0.1.2",
+    "fixest": "0.14.2",
+    "jsonlite": "2.0.0",
+    "nlme": "3.1.164",
+    "numDeriv": "2016.8.1.1",
+    "sandwich": "3.1.2",
+    "stringmagic": "1.2.0",
+    "trust": "0.1.9"
+  },
+  "r_version": "R version 4.3.3 (2024-02-29)"
+}

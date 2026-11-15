@@ -1,0 +1,6 @@
+address,arm,stratum,matched,weight
+0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa01,exposed,1,TRUE,1
+0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa02,exposed,1,TRUE,1
+0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb01,control,1,TRUE,1
+0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb02,control,1,TRUE,1
+0xdddddddddddddddddddddddddddddddddddddddd,control,1,FALSE,0

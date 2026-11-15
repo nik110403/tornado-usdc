@@ -1,0 +1,26 @@
+population_id,generation_id,input_trace_hash,row_id,prespec_ref,status,reason
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,h1_pooled_35d,§3 sole confirmatory H1,estimated,h1_status=supported; veto=FALSE; clip_flag=FALSE
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,h1a,§3 H1a confirmatory-secondary,estimated,
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,cluster_sizes,§2 cluster sizes/counts,estimated,
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,cem_weight_concentration,§2,estimated,
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,descriptive_uncapped_legs,§2,estimated,
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,cap_clip_diagnostics,§2,estimated,
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,h2_terciles_intensity,§3 exploratory,estimated (exploratory),
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,outflow_breakdown,§3 conditional,not estimable,verified evidence manifest absent: components are not inferred or labelled
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,outflow_cex,§3,unavailable,no verified centralised-exchange label source
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,post_time_path,§4 descriptive,estimated,
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,pretrend_60_days,§5.1,estimated,
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,june_placebo,§5.2,not owned by S19,genuine June execution is S21
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,placebo_cohort,§5.3,not estimable,verified frozen lending/exchange manifest absent; no substitute cohort
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,binance_shortened_window,§5.4,estimated,
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,binance_flags_and_outflow_shares,§5.4,not estimable,no verified Binance label source
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,drdid_capped_D,§5.5,estimated,
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,drdid_uncapped_D,§5.5,estimated,
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,no_usdc_share,§5.6 / §1a no USDC share,estimated,
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,quartile_share,§5.6 / §1a exposed-quartile USDC share,estimated,
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,drop_later_freeze,§5.9 drop wallets frozen 8 Aug-12 Sep,estimated,
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,usdc_pool_flagged,§5.10 USDC-pool depositors (exploratory),estimated,
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,usdc_pool_unflagged,§5.10 other exposed wallets (exploratory),estimated,
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,deposit_address_reuse,§5.7 / §1b,not estimable,no verified exchange-label source
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,uncapped_and_leg_cap,§5.8,estimated,"a robustness row differs from the primary case: reported, never overrides"
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,owner_grouped_inference,§2,not estimable,no defensible owner partition

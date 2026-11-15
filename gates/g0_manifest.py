@@ -319,7 +319,7 @@ SCHEMA_VERSION = 1
 def _git_commit():
     try:
         return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=_HERE, text=True).strip()
-    except Exception:
+    except (subprocess.CalledProcessError, OSError):
         return "unknown"
 
 
@@ -644,7 +644,7 @@ def run(cfg):
     manifest_path, manifest_sha, manifest_n = _write_table(
         "manifest", list(manifest_by_addr.values()), manifest_columns, "address",
         input_hashes=census_hashes + cluster_hashes,
-        notes="in_recon_19 column omitted -- the reconciliation file is not present in this repo copy (spec fallback).",
+        notes="in_recon_19 column omitted -- 00_admin/research-paper/02_decision/data-recon_2026-09-03.md is not present in this repo copy (spec fallback).",
     )
 
     circle_columns = [

@@ -1,11 +1,20 @@
 cff-version: 1.2.0
 message: "If you use this package, please cite it as below."
 type: software
-title: "USDC holders and the 2022 Tornado Cash freezes: data-construction pipeline (15 October 2026 snapshot)"
-abstract: "The 15 October 2026 construction snapshot of the data pipeline for the paper 'Issuer Discretion and Stablecoin Holdings after the Tornado Cash Sanction' (Khosravipour, 2026). It rebuilds the cohort exposed to Circle's 2022 USDC freezes from raw Ethereum mainnet JSON-RPC calls, through gate g2. It is not the code behind the paper's numbers; that code, signed on 28 October 2026, follows in a versioned replication release."
+title: "USDC holders and the 2022 Tornado Cash freezes: code, signed pre-specification and aggregate results"
+version: "1.0"
+abstract: "Code, the pre-specification signed on 28 October 2026 (byte for byte), its addenda and the aggregate results for the paper 'Issuer Discretion and Stablecoin Holdings after the Tornado Cash Sanction' (Khosravipour, 2026). The data are rebuilt from raw Ethereum mainnet JSON-RPC calls. Wallet-level data are not distributed; the code regenerates them from public logs."
 authors:
   - family-names: Khosravipour
     given-names: Nik
 repository-code: "https://github.com/nik110403/tornado-usdc"
 url: "https://nikkhosravipour.com"
 license: MIT
+preferred-citation:
+  type: article
+  title: "Issuer Discretion and Stablecoin Holdings after the Tornado Cash Sanction"
+  authors:
+    - family-names: Khosravipour
+      given-names: Nik
+  year: 2026
+  month: 11

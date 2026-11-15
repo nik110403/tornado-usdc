@@ -1,0 +1,26 @@
+name: verify
+# T0 = hash check of the signed record (no data, no network). T1 = Python fixture tests.
+# The R test stage (Rscript run_all.R --stage test) is NOT run here: installing the pinned R packages from
+# CRAN archive sources compiles fixest/RcppEigen/bigmemory and is not cheap. Run it locally (see install_r_packages.R).
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  t0:
+    name: T0 hash check
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/verify_release.py
+  t1:
+    name: T1 Python tests
+    runs-on: ubuntu-24.04
+    needs: t0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install pytest
+      - run: python -m pytest -q

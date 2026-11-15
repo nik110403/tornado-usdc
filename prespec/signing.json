@@ -1,0 +1,11 @@
+{
+  "signed_by": "Nik Khosravipour",
+  "signed_date": "2026-10-28",
+  "sha256_list_sha256": "6bc01a5c9132beceec8289e015ef3393ed83b581074259d6c1e44e8cc1a6516e",
+  "files": {
+    "prespec_text": "prespec.md",
+    "numerical_manifest": "manifest.json",
+    "executable_config": "g5_config.json",
+    "code_manifest": "code_manifest.txt"
+  }
+}

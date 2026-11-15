@@ -1,13 +1,14 @@
 # Gate 1b -- control sampling frame probe
 
-Exclusion sweep: 9000000 -> 15302549 (Withdrawal+EncryptedNote, topic-only, tenderly).
-Withdrawal logs: 161570. EncryptedNote logs: 138947.
-Exclusion set: 88130 addresses (61843 withdrawal recipients, 34250 EncryptedNote depositors).
+Exclusion sweep: 9000000 -> 15298282 (= pre_period_end; Withdrawal+EncryptedNote, topic-only, tenderly).
+Withdrawal logs: 161281. EncryptedNote logs: 138773.
+Exclusion set: 87979 addresses (61726 withdrawal recipients, 34207 EncryptedNote depositors).
 
 Sample: 30 windows x 400 blocks, seed 20220609, drawn strictly inside the pre-period [14929560, 15298282] on tenderly.
 Unique candidate addresses (from union to, all windows): 185044.
 Dropped -- in exclusion set: 1211. Dropped -- has code at 15302549: 11537.
 Survivors (control-frame population): 172296.
+Survivor delta vs the event_block-bounded sweep (172296): +0.
 
 ## Per-window detail
 
@@ -97,7 +98,7 @@ Top-1% of survivors by legs hold 39.62% of total legs (1723 addresses / 456098 t
 
 | check | result | detail |
 |---|---|---|
-| exclusion set size reported | PASS | 88130 addresses |
+| exclusion set size reported | PASS | 87979 addresses |
 | no window straddles the pre-period bounds | PASS | ok |
 | receipts tile each window | PASS | ok (structurally enforced -- a tiling failure above would have raised) |
 | summary states implied frame size vs 5x S2 floor-passing count | PASS | implied frame size 139067 is >= 5x the S2 floor-passing exposed count (4508 -> threshold 22540) |
@@ -108,8 +109,8 @@ Cross-endpoint reverification: 5 ranges re-fetched and matched.
 
 ## Outputs
 
-- `exclusion.csv` (88130 rows, sha256 `c5a0559d72790d53747d131e794e56c889ccaa5bc8be0154530beb7ef1c91468`)
-- `frame_survivors.csv` (172296 rows, sha256 `c2c3be88a33a54ac260291ba4fcc26a1b8eb68bc3c2e61b78d68ac8dd0e0feb6`)
+- `exclusion.csv` (87979 rows, sha256 `3de8f5d7d66c2f568c09e68c739534957d975bb6596cd1aab698bf27a9a1d80b`)
+- `frame_survivors.csv` (172296 rows, sha256 `d29389295cebf05ecbe2c1a121d23a4d7ed5013ea87fcf0f867dd3351f1cbac5`)
 
 Exclusion path: `out/g1b/exclusion.csv`
 Survivors path: `out/g1b/frame_survivors.csv`

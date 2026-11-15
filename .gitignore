@@ -1,9 +1,15 @@
+# bulky or private run products; the aggregates in results/ and out/*/summary.md are tracked
 /out/*
 !/out/*/
 /out/*/*
 !/out/*/summary.md
+!/out/recovery/main/
+/out/recovery/main/*
+!/out/recovery/main/gen-M/
+/out/recovery/main/gen-M/*
+!/out/recovery/main/gen-M/summary.md
 __pycache__/
 *.pyc
 .venv/
 .pytest_cache/
-graphify-out/
+/exploratory/rlib/

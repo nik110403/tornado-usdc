@@ -1,0 +1,3 @@
+population_id,generation_id,input_trace_hash,cluster,n_clusters,n_obs,obs_per_cluster_min,obs_per_cluster_median,obs_per_cluster_max,wallets_per_cluster_min,wallets_per_cluster_median,wallets_per_cluster_max,clusters_with_both_arms,n_exposed_wallets,n_control_wallets
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,uid,15982,1518290,95,95,95,1,1,1,0,4487,11495
+main,gen-M,f83e6201da5e92ab8db3ad3e366a92d3c7f5fc5443ce86e107d1fe469c92853e,stratum,692,1518290,190,1520,12920,2,16,136,692,4487,11495

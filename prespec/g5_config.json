@@ -1,0 +1,32 @@
+{
+  "bridge_date": "2022-08-08",
+  "bridge_end_block": 15304705,
+  "eligible_statuses": [
+    "retained"
+  ],
+  "out_dir": "/home/nik/Projects/analysis/tornado-usdc/out/recovery/post/gen-M-post",
+  "populations": [
+    {
+      "frame_path": "/home/nik/Projects/analysis/tornado-usdc/out/recovery/presign/main-gen-M-20261027/eligible_frame_coverage.csv",
+      "generation_id": "gen-M",
+      "population_id": "main",
+      "wallet_map_path": "/home/nik/Projects/analysis/tornado-usdc/out/recovery/presign/wallet-map-20261028/wallet_map.csv"
+    }
+  ],
+  "post_end_block": 15523803,
+  "post_end_date": "2022-09-12",
+  "post_input_paths": {
+    "analysis_parameters": "/home/nik/Projects/analysis/tornado-usdc/out/recovery/presign/main-gen-M-20261027/analysis_parameters.json",
+    "deposit_counts": "/home/nik/Projects/analysis/tornado-usdc/out/recovery/presign/h2-inputs-20261028b/deposit_counts.csv",
+    "eligible_frame_coverage": "/home/nik/Projects/analysis/tornado-usdc/out/recovery/presign/main-gen-M-20261027/eligible_frame_coverage.csv",
+    "g0_circle_events": "/home/nik/Projects/analysis/tornado-usdc/out/g0/circle_events.csv",
+    "g0_receipts": "/home/nik/Projects/analysis/tornado-usdc/out/g0/receipts.jsonl",
+    "g0_usdt_events": "/home/nik/Projects/analysis/tornado-usdc/out/g0/usdt_events.csv",
+    "match_membership": "/home/nik/Projects/analysis/tornado-usdc/out/recovery/presign/main-gen-M-20261027/match_membership.csv",
+    "pre/covariates.csv": "/home/nik/Projects/analysis/tornado-usdc/out/recovery/main/gen-M/covariates.csv",
+    "pre/wallet_coin_day_pre.csv": "/home/nik/Projects/analysis/tornado-usdc/out/recovery/main/gen-M/wallet_coin_day_pre.csv",
+    "usdc_pool_flag": "/home/nik/Projects/analysis/tornado-usdc/out/recovery/presign/h2-inputs-20261028b/usdc_pool_flag.csv"
+  },
+  "post_start_date": "2022-08-09",
+  "pre_end_block": 15298282
+}

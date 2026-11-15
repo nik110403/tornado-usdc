@@ -18,9 +18,9 @@ per-log depositor/recipient address, so there is no S1 output file this gate
 could read. S3 depends only on S1 in the SPEC's dependency graph (S2, which
 does derive per-address withdrawal recipients and EncryptedNote depositors
 for the cohort, runs in parallel with this item -- see
-the project tracker), so this gate re-derives
+plans/tornado-usdc-pipeline/TRACKER.md "S2||S3"), so this gate re-derives
 the same address universe itself over S1's own census span
-(census_start -> event_block). Deposit(bytes32,uint32,uint256) carries no
+(census_start -> pre_period_end since S7; was event_block). Deposit(bytes32,uint32,uint256) carries no
 address field at all (commitment, leafIndex, timestamp only) -- it cannot
 contribute a depositor or recipient, so it is computed (topic-list
 completeness / keccak self-test parity with g0) but never queried; only
@@ -76,6 +76,16 @@ _cross_check_topics()
 # Touches prefixes are gates/g1b_ and out/g1b/ only -- config/ is not listed,
 # and the Contract says "Write ONLY inside this item's Touches: prefixes".
 # See Deviation note in the S3 implementation report.
+# Exclusion sweep upper bound (Part 3 item 24): pinned-block key; the sweep must
+# not read any log after pre_period_end (was event_block through 2026-09-08).
+EXCLUSION_SWEEP_UPPER_KEY = "pre_period_end"
+# S16: the contract screen is anchored at the same pinned cutoff (prespec section 1),
+# not event_block. event_block is event-only and is not read by this gate.
+CONTRACT_SCREEN_KEY = "pre_period_end"
+
+# Survivor count of the 2026-09-08 run (exclusion sweep to event_block), for the delta line in summary.md.
+PRIOR_SURVIVORS_EVENT_BLOCK_SWEEP = 172_296
+
 WINDOW_SEED = 20220609  # pre-period start date (2022-06-09), YYYYMMDD -- deterministic, documented
 N_WINDOWS = 30
 WINDOW_BLOCKS = 400
@@ -387,7 +397,7 @@ def _chapman(n1, n2, m):
 def _read_s2_floor_count():
     """Best-effort read of S2's floor-passing pooled count from
     out/g1/crosstab.md. S3 depends only on S1 (S2 runs in parallel -- see
-    the project tracker) so this degrades
+    plans/tornado-usdc-pipeline/TRACKER.md "S2||S3") so this degrades
     gracefully to None (not a gate failure) when out/g1/crosstab.md is
     absent or its kill-rule line doesn't parse."""
     path = os.path.join(_HERE, "..", "out", "g1", "crosstab.md")
@@ -404,6 +414,16 @@ def _read_s2_floor_count():
         return None
 
 
+def original_windows(pinned):
+    """The 30 original control-frame windows [(start, end)], the single draw (seeded, sorted) used by run() and by the S22 presign side-file producer."""
+    pre_start = pinned["pre_period_start"]["block"]
+    pre_end = pinned["pre_period_end"]["block"]
+    rng = random.Random(WINDOW_SEED)
+    max_start = pre_end - WINDOW_BLOCKS + 1
+    starts = sorted(rng.sample(range(pre_start, max_start + 1), N_WINDOWS))
+    return [(s, s + WINDOW_BLOCKS - 1) for s in starts]
+
+
 def run(cfg):
     os.makedirs(_OUT_DIR, exist_ok=True)
     if os.path.exists(_RECEIPTS_PATH):
@@ -411,9 +431,12 @@ def run(cfg):
 
     pinned = cfg["blocks"]
     census_start = pinned["census_start"]["block"]
-    event_block = pinned["event_block"]["block"]
+    screen_block = pinned[CONTRACT_SCREEN_KEY]["block"]
     pre_start = pinned["pre_period_start"]["block"]
     pre_end = pinned["pre_period_end"]["block"]
+    excl_upper = pinned[EXCLUSION_SWEEP_UPPER_KEY]["block"]
+    assert excl_upper <= pre_end, "exclusion sweep must not read past pre_period_end"
+    assert screen_block <= pre_end, "contract screen must not be anchored past pre_period_end"
 
     checks = []
     all_ranges = []  # every sub-range fetched this gate, tagged with its real
@@ -421,14 +444,14 @@ def run(cfg):
 
     # --- exclusion set: Withdrawal recipients + EncryptedNote depositors,
     # topic-only, no address filter, over S1's own census span ---
-    print(f"[g1b] exclusion sweep: Withdrawal+EncryptedNote {census_start} -> {event_block} on {WIDE}")
+    print(f"[g1b] exclusion sweep: Withdrawal+EncryptedNote {census_start} -> {excl_upper} on {WIDE}")
     start_line = _line_count(_RECEIPTS_PATH)
     excl_logs = _get_logs_chunked(
-        WIDE, census_start, event_block,
+        WIDE, census_start, excl_upper,
         address=None, topics=[[WITHDRAWAL_TOPIC, ENCRYPTED_NOTE_TOPIC]], gate="g1b", window=250_000,
     )
     excl_recs = _new_receipts(start_line)
-    _assert_component_tiled(excl_recs, census_start, event_block, "exclusion sweep")
+    _assert_component_tiled(excl_recs, census_start, excl_upper, "exclusion sweep")
     excl_hashes = [r["sha256"] for r in excl_recs]
     all_ranges.extend(_tag_ranges(excl_recs, None, [[WITHDRAWAL_TOPIC, ENCRYPTED_NOTE_TOPIC]]))
 
@@ -449,9 +472,7 @@ def run(cfg):
     checks.append(("exclusion set size reported", len(exclusion_set) > 0, f"{len(exclusion_set)} addresses"))
 
     # --- 30 windows x 400 blocks, seeded, strictly inside the pre-period ---
-    rng = random.Random(WINDOW_SEED)
-    max_start = pre_end - WINDOW_BLOCKS + 1
-    starts = sorted(rng.sample(range(pre_start, max_start + 1), N_WINDOWS))
+    starts = [s for s, _ in original_windows(pinned)]
     straddle = [s for s in starts if s < pre_start or s + WINDOW_BLOCKS - 1 > pre_end]
     checks.append(("no window straddles the pre-period bounds", not straddle,
                     "ok" if not straddle else f"{len(straddle)} offending starts: {straddle}"))
@@ -485,16 +506,16 @@ def run(cfg):
     dropped_excl = candidates & exclusion_set
     to_check = candidates - exclusion_set
 
-    # --- drop addresses with code at event_block (same anchor SPEC S2(d) uses),
+    # --- drop addresses with code at screen_block = pre_period_end (same anchor g1 uses),
     # batched (mevblocker, 1,500/POST -- same endpoint+size as g1_cohort.py's
     # eth_getCode step) with incremental checkpointing so an interrupted run
     # resumes instead of re-querying everything ---
-    resumed = _load_code_checkpoint(event_block)
+    resumed = _load_code_checkpoint(screen_block)
     resumed = {a: hc for a, hc in resumed.items() if a in to_check}
     remaining = sorted(to_check - set(resumed))
     if resumed:
         print(f"[g1b]   resumed {len(resumed)}/{len(to_check)} addresses from {_CODE_CHECKPOINT_PATH}")
-    print(f"[g1b] eth_getCode check on {len(to_check)} candidates at block {event_block} "
+    print(f"[g1b] eth_getCode check on {len(to_check)} candidates at block {screen_block} "
           f"({BATCH}, batched, {CODE_BATCH_SIZE}/POST; {len(remaining)} remaining after resume)")
 
     has_code = dict(resumed)
@@ -503,16 +524,16 @@ def run(cfg):
         for i in range(0, len(remaining), CODE_BATCH_SIZE):
             chunk = remaining[i:i + CODE_BATCH_SIZE]
             try:
-                results = _batch_get_code(BATCH, chunk, event_block, batch_size=CODE_BATCH_SIZE)
+                results = _batch_get_code(BATCH, chunk, screen_block, batch_size=CODE_BATCH_SIZE)
             except RuntimeError as e:
                 fallback_batches += 1
                 print(f"[g1b]   batch {i // CODE_BATCH_SIZE + 1} failed after retries ({e}); "
                       f"falling back to per-address eth_getCode ({NARROW}) for {len(chunk)} addresses")
-                results = {addr: _get_code(NARROW, addr, event_block) for addr in chunk}
+                results = {addr: _get_code(NARROW, addr, screen_block) for addr in chunk}
             for addr, code in results.items():
                 hc = code not in (None, "0x", "0x0")
                 has_code[addr] = hc
-                _append_code_checkpoint(ckpt_fh, addr, hc, event_block)
+                _append_code_checkpoint(ckpt_fh, addr, hc, screen_block)
             done = min(i + CODE_BATCH_SIZE, len(remaining))
             print(f"[g1b]   checked {done}/{len(remaining)} (+{len(resumed)} resumed)")
 
@@ -631,7 +652,7 @@ def run(cfg):
     summary_lines = [
         "# Gate 1b -- control sampling frame probe",
         "",
-        f"Exclusion sweep: {census_start} -> {event_block} (Withdrawal+EncryptedNote, topic-only, {WIDE}).",
+        f"Exclusion sweep: {census_start} -> {excl_upper} (= {EXCLUSION_SWEEP_UPPER_KEY}; Withdrawal+EncryptedNote, topic-only, {WIDE}).",
         f"Withdrawal logs: {len(withdrawal_logs)}. EncryptedNote logs: {len(encnote_logs)}.",
         f"Exclusion set: {len(exclusion_set)} addresses ({len(recipients)} withdrawal recipients, "
         f"{len(depositors)} EncryptedNote depositors).",
@@ -639,8 +660,10 @@ def run(cfg):
         f"Sample: {N_WINDOWS} windows x {WINDOW_BLOCKS} blocks, seed {WINDOW_SEED}, drawn strictly inside "
         f"the pre-period [{pre_start}, {pre_end}] on {WIDE}.",
         f"Unique candidate addresses (from union to, all windows): {len(candidates)}.",
-        f"Dropped -- in exclusion set: {len(dropped_excl)}. Dropped -- has code at {event_block}: {len(contract_addrs)}.",
+        f"Dropped -- in exclusion set: {len(dropped_excl)}. Dropped -- has code at {screen_block}: {len(contract_addrs)}.",
         f"Survivors (control-frame population): {len(survivors)}.",
+        f"Survivor delta vs the event_block-bounded sweep ({PRIOR_SURVIVORS_EVENT_BLOCK_SWEEP}): "
+        f"{len(survivors) - PRIOR_SURVIVORS_EVENT_BLOCK_SWEEP:+d}.",
         "",
         "## Per-window detail",
         "",
